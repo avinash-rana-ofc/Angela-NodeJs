@@ -56,10 +56,44 @@ app.put("/jokes/:id", (req, res) => {
 })
 
 //6. PATCH a joke
+app.patch("/jokes/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const searchIndex = jokes.findIndex((joke) => joke.id === id);
+  const existingJoke = jokes[searchIndex];
+  const replacementJoke = {
+    id,
+    jokeText : req.body.jokeText || existingJoke.jokeText,
+    jokeType : req.body.jokeType || existingJoke.jokeType
+  }
+  jokes[searchIndex] = replacementJoke
+  res.json(jokes[searchIndex]);
+})
 
 //7. DELETE Specific joke
+app.delete("/jokes/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const searchIndex = jokes.findIndex((joke) => joke.id === id);
+  if(searchIndex > -1){
+    jokes.splice(searchIndex, 1);
+    res.status(200).json("Ok");
+  }else{
+    res.status(404).json({error : `No jokes found with id : ${id}. No jokes deleted`});
+  }
+ 
+})
 
 //8. DELETE All jokes
+app.delete("/all", (req, res) => {
+  console.log(req.query);
+  if(req.query.apiKey === masterKey){
+    jokes = []
+    res.sendStatus(200)
+  }else{
+    res.status(404).json({error : "Not authenticated"})
+  }
+})
 
 app.listen(port, () => {
   console.log(`Successfully started server on port ${port}.`);
